@@ -19,7 +19,7 @@ const DUMMY_PLACES = [
 
   {
     id: 'p2',
-    title: 'Empire State Building',
+    title: 'Emp. State Building',
     description: 'One of the most famous sky scrapers in the world!',
     imageUrl: 'https://www.voyageavecnous.fr/wp-content/uploads/2019/10/visiter-empire-state-building.jpg',
     address: '20 W 34th St, New York, NY 10001',
