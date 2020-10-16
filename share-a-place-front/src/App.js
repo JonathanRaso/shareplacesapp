@@ -5,6 +5,7 @@ import Users from'./user/pages/Users';
 import NewPlace from'./places/pages/NewPlace';
 import UserPlaces from './places/pages/UserPlaces';
 import UpdatePlace from './places/pages/UpdatePlace';
+import PageAuth from './user/pages/PageAuth';
 import MainNavigation from './shared/components/Navigation/MainNavigation';
 
 const App = () => {
@@ -26,6 +27,9 @@ const App = () => {
           </Route>
           <Route path="/places/:placeId" exact>
             <UpdatePlace />
+          </Route>
+          <Route path="/auth" exact>
+            <PageAuth />
           </Route>
           <Redirect to="/" />
         </Switch>
