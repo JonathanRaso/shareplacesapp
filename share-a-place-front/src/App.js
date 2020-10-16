@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 
 import Users from'./user/pages/Users';
@@ -7,15 +7,24 @@ import UserPlaces from './places/pages/UserPlaces';
 import UpdatePlace from './places/pages/UpdatePlace';
 import PageAuth from './user/pages/PageAuth';
 import MainNavigation from './shared/components/Navigation/MainNavigation';
+import { AuthContext } from './shared/context/auth-context';
 
 const App = () => {
-  return (
-    <Router>
-      <MainNavigation />
-      <main>
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const login = useCallback(() => {
+    setIsLoggedIn(true);
+  }, []);
+  
+  const logout = useCallback(() => {
+    setIsLoggedIn(false);
+  }, []);
+
+  let routes;
+
+  if (isLoggedIn) {
+    routes = (
         <Switch>
-          {/* Two ways to write a route */}
-          {/* <Route path="/" component={Users} /> */}
           <Route path="/" exact>
             <Users />
           </Route>
@@ -23,18 +32,43 @@ const App = () => {
             <UserPlaces />
           </Route>
           <Route path="/places/new" exact>
-            <NewPlace />
+              <NewPlace />
           </Route>
           <Route path="/places/:placeId" exact>
             <UpdatePlace />
           </Route>
-          <Route path="/auth" exact>
-            <PageAuth />
-          </Route>
           <Redirect to="/" />
         </Switch>
-      </main>
-    </Router>
+    );
+  } else {
+    routes = (
+      <Switch>
+        <Route path="/" exact>
+          <Users />
+        </Route>
+        <Route path="/:userId/places" exact>
+          <UserPlaces />
+        </Route>
+        <Route path="/auth" exact>
+          <PageAuth />
+        </Route>
+        <Redirect to="/auth" />
+      </Switch>
+    );
+  }
+
+  return (
+    // With context (AuthContext here), we can share state to all the components between the AuContext component
+    <AuthContext.Provider value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}>
+      <Router>
+        <MainNavigation />
+        <main>
+            {/* Two ways to write a route */}
+            {/* <Route path="/" component={Users} /> */}
+            {routes}
+        </main>
+      </Router>
+    </AuthContext.Provider>
   );
 }
 
