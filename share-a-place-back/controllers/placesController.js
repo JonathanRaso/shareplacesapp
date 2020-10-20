@@ -30,18 +30,18 @@ const getPlaceById = (req, res, next) => {
   res.json({ place }); // => { place: place }
 };
 
-const getPlaceByUserId = (req, res, next) => {
+const getPlacesByUserId = (req, res, next) => {
   const userId = req.params.uid;
-  const place = DUMMY_PLACES.find((place) => place.creator === userId);
+  const places = DUMMY_PLACES.filter((place) => place.creator === userId);
 
-  if (!place) {
+  if (!places || places.length === 0) {
     // We can use throw or next() in a sync function. But we need to use next() if we are in async function
     // This error will trigger our error handling middleware
     // Don't forget to return, or the other response will be sent and it's not possible to send 2 responses
-    return next(new HttpError('Could not find a place for the provided user id.', 404));
+    return next(new HttpError('Could not find places for the provided user id.', 404));
   }
 
-  res.json({ place }); // => { place: place }
+  res.json({ places }); // => { place: place }
 };
 
 const createPlace = (req, res, next) => {
@@ -83,7 +83,7 @@ const deletePlace = (req, res, next) => {
 };
 
 exports.getPlaceById = getPlaceById;
-exports.getPlaceByUserId = getPlaceByUserId;
+exports.getPlacesByUserId = getPlacesByUserId;
 exports.createPlace = createPlace;
 exports.updatePlace = updatePlace;
 exports.deletePlace = deletePlace;
