@@ -26,7 +26,6 @@ const getCoordsForAddress = async (address) => {
     lat,
     lng
   };  
-  console.log(coordinates);
 
   return coordinates;
 };

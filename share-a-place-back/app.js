@@ -39,6 +39,7 @@ mongoose
   .connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.jvpwi.mongodb.net/${process.env.DB_DBNAME}?retryWrites=true&w=majority`)
   .then(() => {
     app.listen(5000);
+    console.log('Connection to database Done!')
   })
   .catch((err) => {
     console.log(error);  
