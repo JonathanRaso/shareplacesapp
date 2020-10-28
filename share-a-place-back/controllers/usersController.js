@@ -27,7 +27,7 @@ const signup = async (req, res, next) => {
     );
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let existingUser
   try {
@@ -48,7 +48,7 @@ const signup = async (req, res, next) => {
       email,
       password,
       image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.eschoolnews.com%2Ffiles%2F2014%2F08%2Fonline_testing.3.jpg&f=1&nofb=1',
-      places
+      places: []
     });
 
     try {
