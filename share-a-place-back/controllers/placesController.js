@@ -10,6 +10,7 @@ const User = require('../models/user');
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
+
   let place; 
 
   try {
@@ -33,16 +34,17 @@ const getPlaceById = async (req, res, next) => {
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
   
-  let places;
-
+  // let places;
+  let userWithPlaces
   try {
-    places = await Place.find({ creator: userId });
+    userWithPlaces = await User.findById(userId).populate('places');
   } catch (err) {
     const error = new HttpError('Fetching places failed, please try again later.', 500);
     return next(error);
   }
 
-  if (!places || places.length === 0) {
+  // if (!places || places.places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
     // We can use throw or next() in a sync function. But we need to use next() if we are in async function
     // This error will trigger our error handling middleware
     // Don't forget to return, or the other response will be sent and it's not possible to send 2 responses
@@ -50,7 +52,8 @@ const getPlacesByUserId = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ places: places.map((place) => place.toObject( { getters: true } )) }); // it's an array here, so we have to map on it, and not use toObject like in the getPlacesById method /{ getters: true } => used to get rid of the '_' with _id. Mongoose add an id property to the created object
+  // It's an array here, so we have to map on it, and not use toObject like in the getPlacesById method /{ getters: true } => used to get rid of the '_' with _id. Mongoose add an id property to the created object
+  res.json({ places: userWithPlaces.places.map((place) => place.toObject( { getters: true } )) });
 };
 
 const createPlace = async (req, res, next) => {
@@ -96,14 +99,14 @@ const createPlace = async (req, res, next) => {
 
   // Save the new created place inside our database
   try {
-    // Part 1 => Store the place
+    // Part 1 => Start session and Store the place
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createdPlace.save({ session: sess});
     // Part 2 => Make sure the place id is also added to the user, with mongoose method .push
     user.places.push(createdPlace);
     await user.save({ session: sess });
-    // The changes in the database are only save at this point (sess.commitTransaction()). If anything gone wrong before this point, all changes would have been rollbacked
+    // The changes in the database are only saved at this point (sess.commitTransaction()). If anything gone wrong before this point, all changes would have been rollbacked
     await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError('Creating place failed, please try again.', 500);
@@ -150,14 +153,28 @@ const deletePlace = async (req, res, next) => {
   let place;
 
   try {
-    place = await Place.findById(placeId);
+    // Thanks to .populate('creator'), it gaves us access to the full user object linked to that place
+    place = await Place.findById(placeId).populate('creator');
   } catch (err) {
     const error = new HttpError('Could not find a place for that id.', 404);
     return next(error);
   }
 
+  if (!place) {
+    const error = new HttpError('Could not find place for this id.', 404);
+    return next(error);
+  }
+
   try {
-    await place.remove();
+    // Part 1 => Start session and delete the place
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await place.remove({ session: sess });
+    // Part 2 => Make sure the place id is also removed from the user, with mongoose method .pull
+    place.creator.places.pull(place);
+    await place.creator.save({ session: sess});
+     // The changes in the database are only saved at this point (sess.commitTransaction()). If anything gone wrong before this point, all changes would have been rollbacked
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError('Something went wrong, could not delete place.', 404);
     return next(error);
