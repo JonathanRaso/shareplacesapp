@@ -6,6 +6,7 @@ export const useHttpClient = () => {
 
   const activeHttpRequest = useRef([]);
 
+  // useCallback() is used because it would create an infinite loop without it
   const sendRequest = useCallback (async (url, method = 'GET', body = null, headers = {}) => {
     setIsLoading(true);
     // Logic added in order to stop http request if user change page while the request is sent but not done yet
@@ -13,7 +14,7 @@ export const useHttpClient = () => {
     activeHttpRequest.current.push(httpAbortCtrl);
 
     try {
-      const response = fetch(url, {
+      const response = await fetch(url, {
         method,
         body,
         headers,
@@ -21,6 +22,11 @@ export const useHttpClient = () => {
       });
   
       const responseData = await response.json();
+
+      activeHttpRequest.current = activeHttpRequest.current.filter(
+        (reqCtrl => reqCtrl !== httpAbortCtrl)
+      );
+
           // .ok is a property that exists in the response object. So if there is a 4.. or 5.. http code, we want to throw an error.
           // With fetch(), this codes will not go into our catch block and we are redirected because of the auth.login();
           // So, we need this if block in order to take care of these 4.. or 5.. codes
@@ -28,11 +34,13 @@ export const useHttpClient = () => {
         throw new Error(responseData.message);
       }
 
+      setIsLoading(false);
       return responseData;
     } catch (err) {
       setError(err.message);
+      setIsLoading(false);   
+      throw err
     }
-    setIsLoading(false);   
   }, []);
 
   const clearError = () => {
