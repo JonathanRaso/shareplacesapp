@@ -100,6 +100,7 @@ const createPlace = async (req, res, next) => {
   // Save the new created place inside our database
   try {
     // Part 1 => Start session and Store the place
+    // With transaction, you can't create new collection on the fly, so we need to create it inside mongodb before creating new place or new user
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createdPlace.save({ session: sess});
