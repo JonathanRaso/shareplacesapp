@@ -17,6 +17,15 @@ dotenv.config();
 // We will find this data inside req.body
 app.use(bodyParser.json());
 
+// This middleware will add header to every response, in order to take care of CORS issues
+app.use((req, res, next) => {
+  // '*' give access to any domain
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+  next();
+});
+
 app.use('/api/places', placesRoutes);
 app.use('/api/users', usersRoutes);
 
