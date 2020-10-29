@@ -56,12 +56,39 @@ const PageAuth = () => {
 
   const authSubmitHandler = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
     
     if (isLoginMode) {
+      try {
+        const response = await fetch('http://localhost:5000/api/users/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          // JSON.stringify will take regular javascript data and convert it to json. Our back expect a body in json format.
+          body: JSON.stringify({
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          }) 
+        });
+
+        const responseData = await response.json();
+
+        // .ok is a property that exists in the response object. So if there is a 4.. or 5.. http code, we want to throw an error.
+        // With fetch(), this codes will not go into our catch block and we are redirected because of the auth.login();
+        // So, we need this if block in order to take care of these 4.. or 5.. codes
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
+        setIsLoading(false);
+        auth.login();
+      } catch (err) {
+        console.log(err);
+        setIsLoading(false);
+        setError(err.message || 'Something went wrong, please try again');
+      }
     } else {
       try {
-        setIsLoading(true);
-
         const response = await fetch('http://localhost:5000/api/users/signup', {
           method: 'POST',
           headers: {
@@ -83,8 +110,6 @@ const PageAuth = () => {
         if (!response.ok) {
           throw new Error(responseData.message);
         }
-
-        console.log(responseData);
         setIsLoading(false);
         auth.login();
       } catch (err) {
