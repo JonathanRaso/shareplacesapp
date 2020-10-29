@@ -50,11 +50,33 @@ const PageAuth = () => {
     setIsLoginMode(!isLoginMode);
   };
 
-  const authSubmitHandler = (event) => {
+  const authSubmitHandler = async (event) => {
     event.preventDefault();
+    
+    if (isLoginMode) {
+    } else {
+      try {
+        const response = await fetch('http://localhost:5000/api/users/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          // JSON.stringify will take regular javascript data and convert it to json. Our back expect a body in json format.
+          body: JSON.stringify({
+            name: formState.inputs.name.value,
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          }) 
+        });
+
+        const responseData = await response.json();
+        console.log(responseData);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
     auth.login();
-    console.log('Logged in!');
-    console.log(formState.inputs);
   }
   
 
