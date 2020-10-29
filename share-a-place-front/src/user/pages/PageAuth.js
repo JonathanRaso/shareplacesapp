@@ -5,6 +5,8 @@ import { useForm } from '../../shared/hooks/form-hook';
 import Card from '../../shared/components/UIElements/Card';
 import Input from '../../shared/components/FormElements/Input';
 import Button from '../../shared/components/FormElements/Button';
+import ErrorModal from'../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from'../../shared/components/UIElements/LoadingSpinner';
 
 import { AuthContext } from '../../shared/context/auth-context';
 
@@ -14,6 +16,8 @@ const PageAuth = () => {
   const auth = useContext(AuthContext);
   
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   const [formState, inputHandler, setFormData] = useForm(
     {
@@ -56,6 +60,8 @@ const PageAuth = () => {
     if (isLoginMode) {
     } else {
       try {
+        setIsLoading(true);
+
         const response = await fetch('http://localhost:5000/api/users/signup', {
           method: 'POST',
           headers: {
@@ -70,18 +76,34 @@ const PageAuth = () => {
         });
 
         const responseData = await response.json();
+
+        // .ok is a property that exists in the response object. So if there is a 4.. or 5.. http code, we want to throw an error.
+        // With fetch(), this codes will not go into our catch block and we are redirected because of the auth.login();
+        // So, we need this if block in order to take care of these 4.. or 5.. codes
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
+
         console.log(responseData);
+        setIsLoading(false);
+        auth.login();
       } catch (err) {
         console.log(err);
+        setIsLoading(false);
+        setError(err.message || 'Something went wrong, please try again');
       }
     }
-
-    auth.login();
-  }
+  };
   
+  const errorHandler = () => {
+    setError(null);
+  }
 
   return (
+    <>
+    <ErrorModal error={error} onClear={errorHandler}/>
     <Card className="authentication">
+      {isLoading && <LoadingSpinner asOverlay/>}
       <h2>{isLoginMode ? 'Login' : 'Signup'}</h2>
       <hr />
       <form onSubmit={authSubmitHandler}>
@@ -122,6 +144,7 @@ const PageAuth = () => {
           SWITCH TO {isLoginMode ? 'SIGNUP' : 'LOGIN'}
         </Button>
     </Card>  
+    </>
   );
 };
 
