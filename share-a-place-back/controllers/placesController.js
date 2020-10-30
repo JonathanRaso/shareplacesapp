@@ -1,4 +1,5 @@
-const { uuid } = require('uuidv4');
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -60,7 +61,6 @@ const createPlace = async (req, res, next) => {
   // Look into the request object and see if there are any validations error based on the config inside place-routes.js
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors);
     return next(new HttpError('Invalid inputs passed, please check your data.', 422));
   }
 
@@ -78,7 +78,7 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     location: coordinates,
-    image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.eschoolnews.com%2Ffiles%2F2014%2F08%2Fonline_testing.3.jpg&f=1&nofb=1',
+    image: req.file.path,
     creator
   });
 
@@ -152,12 +152,11 @@ const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
 
   let place;
-
   try {
     // Thanks to .populate('creator'), it gaves us access to the full user object linked to that place
     place = await Place.findById(placeId).populate('creator');
   } catch (err) {
-    const error = new HttpError('Could not find a place for that id.', 404);
+    const error = new HttpError('Somehting went wrong, could not delete place.', 500);
     return next(error);
   }
 
@@ -165,6 +164,8 @@ const deletePlace = async (req, res, next) => {
     const error = new HttpError('Could not find place for this id.', 404);
     return next(error);
   }
+
+  const imagePath = place.image;
 
   try {
     // Part 1 => Start session and delete the place
@@ -177,9 +178,14 @@ const deletePlace = async (req, res, next) => {
      // The changes in the database are only saved at this point (sess.commitTransaction()). If anything gone wrong before this point, all changes would have been rollbacked
     await sess.commitTransaction();
   } catch (err) {
-    const error = new HttpError('Something went wrong, could not delete place.', 404);
+    const error = new HttpError('Something went wrong, could not delete place.', 500);
     return next(error);
   }
+
+  // Delete the image from our uploads/images folder
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
 
   res.status(200).json({ message: 'Deleted place.' });
 };
