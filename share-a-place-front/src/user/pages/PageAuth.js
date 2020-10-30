@@ -120,7 +120,7 @@ const PageAuth = () => {
             onInput={inputHandler}
           />
         )}
-        {!isLoginMode && <ImageUpload center id="image" onInput={inputHandler} />}
+        {!isLoginMode && <ImageUpload center id="image" onInput={inputHandler} errorText="Please provide an image." />}
         <Input 
           id="email"
           element="input"
