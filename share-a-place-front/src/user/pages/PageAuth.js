@@ -6,6 +6,7 @@ import Input from '../../shared/components/FormElements/Input';
 import Button from '../../shared/components/FormElements/Button';
 import ErrorModal from'../../shared/components/UIElements/ErrorModal';
 import LoadingSpinner from'../../shared/components/UIElements/LoadingSpinner';
+import ImageUpload from '../../shared/components/FormElements/ImageUpload';
 
 import { useForm } from '../../shared/hooks/form-hook';
 import { useHttpClient } from '../../shared/hooks/http-hook';
@@ -38,7 +39,8 @@ const PageAuth = () => {
       setFormData(
         {
           ...formState.inputs,
-          name: undefined
+          name: undefined,
+          image: undefined
         }, 
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -48,6 +50,10 @@ const PageAuth = () => {
         name: {
           value: '',
           isValid: false
+        },
+        image: {
+          value: null,
+          isValid: false
         }
       }, false);
     }
@@ -56,6 +62,8 @@ const PageAuth = () => {
 
   const authSubmitHandler = async (event) => {
     event.preventDefault();
+
+    console.log(formState.inputs);
     
     if (isLoginMode) {
       try{
@@ -114,7 +122,8 @@ const PageAuth = () => {
             errorText="Please, enter a name."
             onInput={inputHandler}
           />
-        )} 
+        )}
+        {!isLoginMode && <ImageUpload center id="image" onInput={inputHandler} />}
         <Input 
           id="email"
           element="input"
