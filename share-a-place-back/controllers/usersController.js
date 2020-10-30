@@ -21,7 +21,6 @@ const getUsers = async (req, res, next) => {
 const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors);
     return next(new HttpError('Invalid input for signup, please check your data', 422)
     );
   }
@@ -45,8 +44,8 @@ const signup = async (req, res, next) => {
     const createdUser = new User ({
       name,
       email,
+      image: req.file.path,
       password,
-      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.eschoolnews.com%2Ffiles%2F2014%2F08%2Fonline_testing.3.jpg&f=1&nofb=1',
       places: []
     });
 

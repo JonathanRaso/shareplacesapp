@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -16,6 +19,8 @@ dotenv.config();
 // This middleware will parse any incoming request body and extract any json data inside, converted to regular javascript and call next.
 // We will find this data inside req.body
 app.use(bodyParser.json());
+
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 // This middleware will add header to every response, in order to take care of CORS issues
 app.use((req, res, next) => {
@@ -37,6 +42,13 @@ app.use((req, res, next) => {
 
 // Error handling middleware function. Will only be executed on requests that have an error attached to it
 app.use((error, req, res, next) => {
+  // Multer adds a new property to the request object : file. So we check if the request has a file attached to it, 
+  // and remove this image from our images folder (uploads/images)
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
   if (res.headerSent) {
     return next(error);
   }
