@@ -135,6 +135,14 @@ const updatePlace = async (req, res, next) => {
     return next(error); 
   }
 
+  // We need to check if the user who wants to update the place is the creator of this place
+  // req.userData.userId comes from check-auth.js, and we can compare if the userId inside the token is the same as the id of the creator of the place
+  // place.creator is of type mongoose.objectId, and req.userData.userId is a string. So we need to convert it in order to check if these two datas are the same
+  if (place.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('You are not allowed to edit this place.', 401);
+    return next(error); 
+  }
+
   place.title = title;
   place.description = description;
 
@@ -160,9 +168,18 @@ const deletePlace = async (req, res, next) => {
     return next(error);
   }
 
+  
   if (!place) {
     const error = new HttpError('Could not find place for this id.', 404);
     return next(error);
+  }
+
+  // We need to check if the user who wants to delete the place is the creator of this place.
+  // req.userData.userId comes from check-auth.js, and we can compare if the userId inside the token is the same as the id of the creator of the place.
+  // place.creator.id is an object with full details of the creator (thanks to .populate('creator')), so we don't need to convert it like in the updatePlace method.
+  if (place.creator.id !== req.userData.userId) {
+    const error = new HttpError('You are not allowed to delete this place.', 401);
+    return next(error); 
   }
 
   const imagePath = place.image;

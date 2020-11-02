@@ -91,12 +91,12 @@ const login = async (req, res, next) => {
   try {
     identifiedUser = await User.findOne({ email: email });
   } catch (err) {
-    const error = new HttpError('Logging in failed, please try again later.', 401);
+    const error = new HttpError('Logging in failed, please try again later.', 500);
     return next(error);
   }
 
   if (!identifiedUser) {
-    const error = new HttpError('Invalid credentials, could not log you in.', 401);
+    const error = new HttpError('Invalid credentials, could not log you in.', 403);
     return next(error);
   }
 
@@ -110,7 +110,7 @@ const login = async (req, res, next) => {
   }
 
   if (!isValidPassword) {
-    const error = new HttpError('Invalid credentials, could not log you in.', 401);
+    const error = new HttpError('Invalid credentials, could not log you in.', 403);
     return next(error);
   }
 
