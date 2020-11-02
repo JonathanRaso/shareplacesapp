@@ -72,8 +72,8 @@ const signup = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email }, 
-      'supersecret_dont_share', 
-      {expiresIn: '1h'}
+      'QHhpZGlvCg==', 
+      { expiresIn: '1h' }
     );
   } catch (err) {
     const error = new HttpError('Signing up failed, please try again.', 500);
@@ -103,7 +103,7 @@ const login = async (req, res, next) => {
   let isValidPassword = false;
   try {
     // isValidPassword will be true of false here (bool)
-    isValidPassword= await bcrypt.compare(password, existingUser.password)
+    isValidPassword= await bcrypt.compare(password, identifiedUser.password)
   } catch (err) {
     const error = new HttpError('Could not log you in, please check your credentials and try again.', 500);
     return next(error);
@@ -119,7 +119,7 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       {userId: identifiedUser.id , email: identifiedUser.email },
-      'supersecret_dont_share',
+      'QHhpZGlvCg==',
       { expiresIn: '1h' }
     )
   } catch (err) {
