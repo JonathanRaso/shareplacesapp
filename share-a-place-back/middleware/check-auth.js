@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
     }
     // decodedToken will be the payload encoded in the token, not a boolean. If verification doesn't failed, we can let the request continue with next().
     // If verification failed, it will throw an error and we go to the catch block
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const decodedToken = jwt.verify(token, 'supersecret_dont_share');
     // Add userData with infos about user, inside the request
     req.userData = { userId: decodedToken.userId }
     next();
