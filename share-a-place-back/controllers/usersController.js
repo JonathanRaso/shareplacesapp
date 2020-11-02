@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
+const { JsonWebTokenError } = require('jsonwebtoken');
 
 const getUsers = async (req, res, next) => {
 
@@ -66,7 +67,20 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({user: createdUser.toObject({ getters: true })}); 
+  // We generate a token with jsonwebtoken package, and we attach user infos like id and email into the token.
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email }, 
+      process.env.JWT_SECRET, 
+      {expiresIn: '1h'}
+    );
+  } catch (err) {
+    const error = new HttpError('Signing up failed, please try again.', 500);
+    return next(error);
+  }
+
+  res.status(201).json({ userId: createdUser.id, email: createdUser.email, token: token }); 
 }; 
 
 const login = async (req, res, next) => {
@@ -100,9 +114,23 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
+  // Generate a new token when login
+  let token;
+  try {
+    token = jwt.sign(
+      {userId: identifiedUser.id , email: identifiedUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    )
+  } catch (err) {
+    const error = new HttpError('Logging in failed, please try again.', 500);
+    return next(error);
+  }
+
   res.status(200).json({
-    message: 'Logged in!', 
-    user: identifiedUser.toObject({ getters: true })
+    userId: identifiedUser.id,
+    email: identifiedUser.email,
+    token: token
   });
 };
 
