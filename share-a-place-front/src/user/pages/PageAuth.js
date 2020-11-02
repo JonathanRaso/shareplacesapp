@@ -77,10 +77,8 @@ const PageAuth = () => {
             'Content-Type': 'application/json'
           }
         );  
-        auth.login(responseData.user.id);
-      } catch (err) {
-
-      }
+        auth.login(responseData.userId, responseData.token);
+      } catch (err) {}
     } else {
       try {
         // Allow us to send text AND file, we need this here because JSON.stringify only accepts text
@@ -96,7 +94,7 @@ const PageAuth = () => {
           formData
         );
 
-        auth.login(responseData.user.id);
+        auth.login(responseData.userId, responseData.token);
       } catch (err) {}
     }
   };
