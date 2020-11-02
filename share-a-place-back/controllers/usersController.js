@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
@@ -40,24 +41,33 @@ const signup = async (req, res, next) => {
     const error = new HttpError('User exists already, please try again.', 422);
     return next(error);
   }
-   
-    const createdUser = new User ({
-      name,
-      email,
-      image: req.file.path,
-      password,
-      places: []
-    });
 
-    try {
-      await createdUser.save();
-    } catch (err) {
-      const error = new HttpError('Signing up failed, please try again.', 500);
-      return next(error);
-    }
+  // We use bcryptjs to hash the password.
+  let hashedPassword;
+  try{
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError('Could not create user, please try again.', 500);
+    return next(error);
+  }
+  
+  const createdUser = new User ({
+    name,
+    email,
+    image: req.file.path,
+    password: hashedPassword,
+    places: []
+  });
 
-    res.status(201).json({user: createdUser.toObject({ getters: true })}); 
-  } 
+  try {
+    await createdUser.save();
+  } catch (err) {
+    const error = new HttpError('Signing up failed, please try again.', 500);
+    return next(error);
+  }
+
+  res.status(201).json({user: createdUser.toObject({ getters: true })}); 
+}; 
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -71,7 +81,21 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  if (!identifiedUser || identifiedUser.password !== password) {
+  if (!identifiedUser) {
+    const error = new HttpError('Invalid credentials, could not log you in.', 401);
+    return next(error);
+  }
+
+  let isValidPassword = false;
+  try {
+    // isValidPassword will be true of false here (bool)
+    isValidPassword= await bcrypt.compare(password, existingUser.password)
+  } catch (err) {
+    const error = new HttpError('Could not log you in, please check your credentials and try again.', 500);
+    return next(error);
+  }
+
+  if (!isValidPassword) {
     const error = new HttpError('Invalid credentials, could not log you in.', 401);
     return next(error);
   }
