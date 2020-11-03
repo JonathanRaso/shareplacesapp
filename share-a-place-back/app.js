@@ -4,7 +4,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv');
 
 const placesRoutes = require('./routes/places-routes');
 const usersRoutes = require('./routes/users-routes');
@@ -14,7 +14,8 @@ const HttpError = require('./models/http-error');
 const app = express();
 
 // Use this for database credentials inside process.env, thanks to the dotenv package.
-dotenv.config();
+// !!! No more useful, nodemon.json for env variables now. Keep this for example !!!
+//dotenv.config();
 
 // This middleware will parse any incoming request body and extract any json data inside, converted to regular javascript and call next.
 // We will find this data inside req.body
@@ -65,6 +66,3 @@ mongoose
   .catch((err) => {
     console.log(error);  
   });
-
-  /* app.listen(5000);
-  console.log(process.env.DB_USERNAME, process.env.DB_PASSWORD, process.env.DB_DBNAME); */
