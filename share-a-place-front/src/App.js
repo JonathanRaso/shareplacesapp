@@ -14,13 +14,21 @@ const App = () => {
   const [userId, setUserId] = useState(false);
 
   
-  const login = useCallback((uid, token) => {
+  const login = useCallback((uid, token, expirationDate) => {
     setToken(token);
     setUserId(uid);
+    // Generate a new object date that's based on the current time + 1 hour. Our token will expire 1h after creation
+    // If we already have an expirationDate for the token, we keep it. Else, we create a new one.
+    // We need that because when we refresh the page, it would generate a new 1h token and we don't want that
+    const tokenExpirationDate = expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
     localStorage.setItem(
       'userData',
-      JSON.stringify({ userId: uid, token: token })
-      );
+      JSON.stringify({ 
+        userId: uid,
+        token: token, 
+        expiration: tokenExpirationDate.toISOString() 
+      })
+    );
     }, []);
     
     const logout = useCallback(() => {
@@ -34,8 +42,13 @@ const App = () => {
     useEffect(() => {
       // JSON.parse converts JSON strings back to regular javascript data structures (like object)
       const storedData = JSON.parse(localStorage.getItem('userData'));
-      if (storedData && storedData.token) {
-        login(storedData.userId, storedData.token);
+      if (
+        storedData && 
+        storedData.token && 
+        // We check if the expiration date in our token is greater than the actual time. If yes, the token is still valid
+        new Date(storedData.expiration) > new Date()
+      ) {
+        login(storedData.userId, storedData.token, new Date(storedData.expiration));
       }
     }, [login]);
 
