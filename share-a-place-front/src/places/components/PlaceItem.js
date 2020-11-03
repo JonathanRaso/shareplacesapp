@@ -11,7 +11,7 @@ import { AuthContext } from '../../shared/context/auth-context';
 
 import './PlaceItem.css';
 
-const PlaceItem = ({image, title, address, description, id, coordinates, ...props}) => {
+const PlaceItem = ({image, title, address, description, id, coordinates, onDelete, ...props}) => {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const auth = useContext(AuthContext);
   const [showMap, setShowMap] = useState(false);
@@ -40,7 +40,7 @@ const PlaceItem = ({image, title, address, description, id, coordinates, ...prop
           Authorization: 'Bearer ' + auth.token
         }
       );
-      props.onDelete(id);  
+      onDelete(id);  
     } catch (err) {}
   }
 
