@@ -66,7 +66,7 @@ const PageAuth = () => {
     if (isLoginMode) {
       try{
         const responseData = await sendRequest(
-          'http://localhost:5000/api/users/login',
+          process.env.REACT_APP_BACKEND_URL + '/users/login',
           'POST',
           // JSON.stringify will take regular javascript data and convert it to json. Our back expect a body in json format.
           JSON.stringify({
@@ -88,7 +88,7 @@ const PageAuth = () => {
         formData.append('password', formState.inputs.password.value)
         formData.append('image', formState.inputs.image.value)
         const responseData = await sendRequest(
-          'http://localhost:5000/api/users/signup',
+          process.env.REACT_APP_BACKEND_URL + '/users/signup',
           'POST',
           // formData automatically sets headers, so we don't need to specify 'Content-Type': 'multipart/form-data' for example .
           formData
