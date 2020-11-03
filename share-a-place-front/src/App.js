@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 
 import Users from'./user/pages/Users';
@@ -13,19 +13,35 @@ const App = () => {
   const [token, setToken] = useState(false);
   const [userId, setUserId] = useState(false);
 
+  
   const login = useCallback((uid, token) => {
     setToken(token);
     setUserId(uid);
-  }, []);
-  
-  const logout = useCallback(() => {
-    setToken(null);
-    setUserId(null);
-  }, []);
+    localStorage.setItem(
+      'userData',
+      JSON.stringify({ userId: uid, token: token })
+      );
+    }, []);
+    
+    const logout = useCallback(() => {
+      setToken(null);
+      setUserId(null);
+      localStorage.removeItem('userData');
+    }, []);
+    
+    // useEffect with empty array [] will only runs once. It also runs after the render cycle
+    // Here, there is a dependency (login), but thanks to useCallback(uid, token), login will run only once
+    useEffect(() => {
+      // JSON.parse converts JSON strings back to regular javascript data structures (like object)
+      const storedData = JSON.parse(localStorage.getItem('userData'));
+      if (storedData && storedData.token) {
+        login(storedData.userId, storedData.token);
+      }
+    }, [login]);
 
-  let routes;
-
-  if (token) {
+    let routes;
+    
+    if (token) {
     routes = (
         <Switch>
           <Route path="/" exact>
