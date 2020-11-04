@@ -1,8 +1,0 @@
-{
-  "env": {
-    "DB_USERNAME": "Enter database username",
-    "DB_PASSWORD": "Enter database password",
-    "DB_DBNAME": "Enter database name",
-    "JWT_KEY": "Enter your secret JWT key"
-  }
-}
