@@ -60,9 +60,14 @@ const App = () => {
       </Switch>
     );
   }
+  
+  // With context (AuthContext here), we can share state to all the components between the AuContext component
+  // If we use React.lazy for splitting our code, we need to wrap our routes inside <Suspense> component
+  // fallback will display the loading spinner if our page is too long to load
+  // Two ways to write a route
+  // <Route path="/" component={Users} />
 
   return (
-    // With context (AuthContext here), we can share state to all the components between the AuContext component
     <AuthContext.Provider 
       value={{ 
         isLoggedIn: !!token,
@@ -75,16 +80,12 @@ const App = () => {
       <Router>
         <MainNavigation />
         <main>
-            {/* If we use React.lazy for splitting our code, we need to wrap our routes inside <Suspense> component */}
-            {/* fallback will display the loading spinner if our page is too long to load */}
             <Suspense 
               fallback={
                 <div className="center">
                   <LoadingSpinner />
                 </div>}
               >
-                {/* Two ways to write a route */}
-                {/* <Route path="/" component={Users} /> */}
                 {routes}
             </Suspense>
         </main>

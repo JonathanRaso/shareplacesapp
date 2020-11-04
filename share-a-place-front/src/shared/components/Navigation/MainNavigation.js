@@ -18,9 +18,9 @@ const MainNavigation = () => {
     setDrawerIsOpen(false);
   }
 
+  // We need only one root element, so we can use <></> or <React.Fragment></React.Fragment> to wrap both SideDrawer and MainHeader components
   return (
     <>
-      {/* We need only one root element, so we can use <></> or <React.Fragment></React.Fragment> to wrap both SideDrawer and MainHeader components */}
       {drawerIsOpen && <Backdrop onClick={closeDrawerHandler} />}
 
         <SideDrawer show={drawerIsOpen} onClick={closeDrawerHandler}>

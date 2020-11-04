@@ -17,8 +17,8 @@ const SideDrawer = ({children, show, onClick}) => {
     </CSSTransition>
   );
 
+  // We use ReactDOM.createPortal to create a "portal" and display this element outside of the root div. #drawer-hook is inside the index.html file
   return(
-    {/* We use ReactDOM.createPortal to create a "portal" and display this element outside of the root div. #drawer-hook is inside the index.html file */},
     ReactDOM.createPortal(content, document.getElementById('drawer-hook'))
   );
 
